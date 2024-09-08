@@ -1,1 +1,1 @@
-# Tarea1_Mecanica_Estadistica_Avanzada
+# Tarea2_Mecanica_Estadistica_Avanzada
