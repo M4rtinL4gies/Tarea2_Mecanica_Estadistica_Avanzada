@@ -1,8 +1,8 @@
 reset session
 
 # PARÁMETROS ------------------------------------------------------------------
-arch_direct = "data_direct_pi.txt"
-arch_markov = "data_markov_pi.txt"
+arch_direct = "data/data_direct_pi.txt"
+arch_markov = "data/data_markov_pi.txt"
 
 $Data <<EOD
 10	0.78
