@@ -4,8 +4,9 @@
 #include <cmath>
 #include <numeric>
 #include <fstream>
+#include <omp.h>  // Es necesario incluir OpenMP
 
-// Function to initialize neighbors with periodic boundary conditions (PBC)
+// Función para inicializar los vecinos con condiciones de frontera periódicas (PBC)
 std::vector<std::vector<int>> nbrs(int N, bool pbc) {
     int L = static_cast<int>(std::sqrt(N));
     std::vector<std::vector<int>> nbr(N);
@@ -13,10 +14,10 @@ std::vector<std::vector<int>> nbrs(int N, bool pbc) {
     if (pbc) {
         for (int i = 0; i < N; ++i) {
             nbr[i] = {
-                (i / L) * L + (i + 1) % L,  // Right
-                (i + L) % N,               // Bottom
-                (i / L) * L + (i - 1 + L) % L, // Left
-                (i - L + N) % N            // Top
+                (i / L) * L + (i + 1) % L,  // Derecha
+                (i + L) % N,                // Abajo
+                (i / L) * L + (i - 1 + L) % L, // Izquierda
+                (i - L + N) % N             // Arriba
             };
         }
     } else {
@@ -24,13 +25,13 @@ std::vector<std::vector<int>> nbrs(int N, bool pbc) {
             int row = i / L;
             int col = i % L;
 
-            // Right
+            // Derecha
             if (col < L - 1) nbr[i].push_back(i + 1);
-            // Bottom
+            // Abajo
             if (row < (N / L) - 1) nbr[i].push_back(i + L);
-            // Left
+            // Izquierda
             if (col > 0) nbr[i].push_back(i - 1);
-            // Top
+            // Arriba
             if (row > 0) nbr[i].push_back(i - L);
         }
     }
@@ -38,7 +39,7 @@ std::vector<std::vector<int>> nbrs(int N, bool pbc) {
     return nbr;
 }
 
-// Function to calculate the molecular field
+// Función para calcular el campo molecular
 int molecular_field(const std::vector<int>& spins, const std::vector<std::vector<int>>& nbr, int k) {
     int h = 0;
     for (int i : nbr[k]) {
@@ -47,7 +48,7 @@ int molecular_field(const std::vector<int>& spins, const std::vector<std::vector
     return h;
 }
 
-// Markov Ising function
+// Función de Markov para el modelo Ising
 void markov_ising(std::vector<int>& spins, int& E, const std::vector<std::vector<int>>& nbr, double T, std::mt19937& rng) {
     int N = spins.size();
     std::uniform_int_distribution<int> dist(0, N - 1);
@@ -64,14 +65,14 @@ void markov_ising(std::vector<int>& spins, int& E, const std::vector<std::vector
     }
 }
 
-// Function to calculate specific heat
+// Función para calcular el calor específico
 double calor_especifico(const std::vector<int>& energy_list, double T) {
     double E_mean = std::accumulate(energy_list.begin(), energy_list.end(), 0.0) / energy_list.size();
     double E2_mean = std::accumulate(energy_list.begin(), energy_list.end(), 0.0, [](double sum, int e) { return sum + e * e; }) / energy_list.size();
     return (E2_mean - E_mean * E_mean) / (T * T);
 }
 
-// Function to calculate energy of Ising configuration
+// Función para calcular la energía del sistema de Ising
 int energy_ising(const std::vector<int>& spins, const std::vector<std::vector<int>>& nbr) {
     int E = 0;
     for (size_t k = 0; k < spins.size(); ++k) {
@@ -79,10 +80,10 @@ int energy_ising(const std::vector<int>& spins, const std::vector<std::vector<in
             E -= spins[k] * spins[n];
         }
     }
-    return E / 2; // To avoid double counting
+    return E / 2; // Evitar doble conteo
 }
 
-// Function to write data
+// Función para escribir los datos de energía y calor específico
 void write_data(const std::vector<double>& e_list, const std::vector<double>& cv_list, const std::vector<double>& T) {
     std::ofstream file("data/energy.txt", std::ios::app);
     file << "T\t<e>\tcv\n";
@@ -93,7 +94,7 @@ void write_data(const std::vector<double>& e_list, const std::vector<double>& cv
     file.close();
 }
 
-// Function to write data magnetization
+// Función para escribir los datos de magnetización
 void write_data_m(const std::vector<double>& m_list, const std::vector<double>& T, int N) {
     std::ofstream file("data/magnetization.txt", std::ios::app);
     file << (int(std::sqrt(N))) << "x" << (int(std::sqrt(N))) << "\n";
@@ -105,59 +106,60 @@ void write_data_m(const std::vector<double>& m_list, const std::vector<double>& 
     file.close();
 }
 
+// Función para correr la simulación
+void run_simulation(double temp, int N, int n_samples, int t_equilibrio, const std::vector<std::vector<int>>& nbr, std::vector<double>& e_mean, std::vector<double>& cv, std::vector<double>& m_mean, int idx) {
+    std::random_device rd;
+    std::mt19937 rng(rd());
+    std::uniform_int_distribution<int> dist_spin(-1, 1);
+    
+    std::vector<int> spins(N);
+    for (int& s : spins) {
+        s = dist_spin(rng) == 0 ? 1 : -1; // Inicializar spins a -1 o 1
+    }
+
+    int E = energy_ising(spins, nbr);
+
+    // Equilibración
+    for (int i = 0; i < t_equilibrio * N; ++i) {
+        markov_ising(spins, E, nbr, temp, rng);
+    }
+
+    std::vector<int> e_list, m_list;
+    for (int i = 0; i < n_samples; ++i) {
+        for (int j = 0; j < N; ++j) {
+            markov_ising(spins, E, nbr, temp, rng);
+        }
+        // e_list.push_back(E);
+        int m = std::accumulate(spins.begin(), spins.end(), 0);
+        m_list.push_back(std::abs(m));
+    }
+
+    // e_mean[idx] = std::accumulate(e_list.begin(), e_list.end(), 0.0) / N / e_list.size();
+    // cv[idx] = calor_especifico(e_list, temp) / N;
+    m_mean[idx] = std::accumulate(m_list.begin(), m_list.end(), 0.0) / N / m_list.size();
+}
+
 int main() {
     int N = 1024;
-    int L = static_cast<int>(std::sqrt(N));
     int n_samples = 1e5;
     int t_equilibrio = 1000;
 
-    std::random_device rd;
-    std::mt19937 rng(rd());
-
     std::vector<std::vector<int>> nbr = nbrs(N, true);
     std::vector<double> T;
-    for (double t = 0; t <= 5.0; t += 0.1) {
+    for (double t = 0.1; t <= 5.0; t += 0.075) {
         T.push_back(t);
     }
 
-    std::vector<std::vector<int>> e_list_all_T(T.size());
-    std::vector<std::vector<int>> m_list_all_T(T.size());
+    std::vector<double> e_mean(T.size()), cv(T.size()), m_mean(T.size());
 
-    for (size_t t_idx = 0; t_idx < T.size(); ++t_idx) {
-        std::uniform_int_distribution<int> dist_spin(-1, 1);
-        std::vector<int> spins(N);
-        for (int& s : spins) {
-            s = dist_spin(rng) == 0 ? 1 : -1; // Initialize spins to -1 or 1
-        }
-        int E = energy_ising(spins, nbr);
-        
-        double t = T[t_idx];
-        for (int i = 0; i < t_equilibrio * N; ++i) { // Equilibration sweeps
-            markov_ising(spins, E, nbr, t, rng);
-        }
-
-        for (int i = 0; i < n_samples; ++i) { // Sampling
-            for (int j = 0; j < N; ++j) {
-                markov_ising(spins, E, nbr, t, rng);
-            }
-            e_list_all_T[t_idx].push_back(E);
-            int m = std::accumulate(spins.begin(), spins.end(), 0);
-            m_list_all_T[t_idx].push_back(std::abs(m));
-        }
+    // Paralelización con OpenMP
+    #pragma omp parallel for
+    for (int t_idx = 0; t_idx < T.size(); ++t_idx) {
+        run_simulation(T[t_idx], N, n_samples, t_equilibrio, nbr, e_mean, cv, m_mean, t_idx);
     }
 
-    // Calculate mean energy and specific heat
-    std::vector<double> e_mean(T.size());
-    std::vector<double> cv(T.size());
-    std::vector<double> m_mean(T.size());
-    for (size_t i = 0; i < T.size(); ++i) {
-        e_mean[i] = std::accumulate(e_list_all_T[i].begin(), e_list_all_T[i].end(), 0.0) / N / e_list_all_T[i].size();
-        cv[i] = calor_especifico(e_list_all_T[i], T[i]) / N;
-        m_mean[i] = std::accumulate(m_list_all_T[i].begin(), m_list_all_T[i].end(), 0.0) / N / m_list_all_T[i].size();
-    }
-
-    // Write data
-    write_data(e_mean, cv, T);
+    // Escribir los resultados
+    // write_data(e_mean, cv, T);
     write_data_m(m_mean, T, N);
 
     return 0;
