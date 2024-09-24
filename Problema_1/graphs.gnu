@@ -106,7 +106,7 @@ set tics font "Times New Roman, 22"
 set xtics offset 0,-1
 set ytics offset -1,0
 
-set xlabel "Number of trials" font "Times New Roman, 22" offset 0,-2
+set xlabel "Number of trials N" font "Times New Roman, 22" offset 0,-2
 set ylabel "N_{hits} / N" font "Times New Roman, 22" offset -5,0
 
 numero = system("read number; echo $number")
@@ -122,7 +122,7 @@ if (numero == 0){
 
 # DESVIACIÓN ESTÁNDAR SAMPLING DIRECTO: ----------------------------------------
 if (numero == 1){
-    set xlabel "Number of trials" font "Times New Roman, 22" offset 0,-2
+    set xlabel "Number of trials N" font "Times New Roman, 22" offset 0,-2
     set ylabel "MSE" font "Times New Roman, 22" offset -1,0
 
     # FIT
@@ -224,7 +224,7 @@ if (numero == 3){
 
 # DESVIACIÓN ESTÁNDAR SAMPLING MARKOV: -----------------------------------------
 if (numero == 4){
-    set xlabel "Number of trials" font "Times New Roman, 22" offset 0,-2
+    set xlabel "Number of trials N" font "Times New Roman, 22" offset 0,-2
     set ylabel "MSE" font "Times New Roman, 22" offset -1,0
 
     # FIT
@@ -380,11 +380,21 @@ if (numero == 6){
     set ytics nomirror
     set y2range [0:0.92]
 
-    p [-0.1:3.2] arch_markov u 1:($4*10**5) every ::3:3::3 w p ps 1 pt 7 lc "blue" notitle, arch_markov u 1:2 every ::1:5::5 w lp ps 1 pt 7 lc "red" axes x1y2 notitle, arch_markov u 1:2 every ::15:5:15:5 w lp ps 1 pt 7 lc "#1bcc23" axes x1y2 notitle, arch_markov u 1:2 every ::23:5:26:5 w lp ps 1 pt 7 lc "#1bcc23" axes x1y2 notitle, $Data3 u 1:2 w p pt 7 lc "blue" dt 3 notitle,  \
-        for [i=2:|P0|] [0:1] '+' u (real(p(i,$1))):(imag(p(i,$1))) w l lc "blue" dashtype 2 notitle, arch_markov u 1:($4*10**5) every ::15:3:15:3 w lp ps 1 pt 7 lc "#1bcc23" notitle, arch_markov u 1:($4*10**5) every ::23:3:26:3 w lp ps 1 pt 7 lc  "#1bcc23" notitle
+    set object circle at 1.25,0.05 size 0.15 dashtype 2
+    set label "Mínimo MSE" font "Times New Roman, 16" at graph 0.45, 0.05
+    set object circle at 1.23,0.2525 size 0.15 dashtype 2
+    #set label "Mínimo MSE" font "Times New Roman, 16" at graph 0.45, 0.5
+    set arrow from 1.24, 0.075 to 1.24, 0.225 dashtype 2 nohead
+
+    p [-0.1:3.2] arch_markov u 1:($4*10**5) every ::3:3::3 w p ps 1 pt 7 lc "blue" notitle, \
+        arch_markov u 1:2 every ::1:5::5 w lp ps 1 pt 7 lc "red" axes x1y2 notitle, \
+        $Data3 u 1:2 w p pt 7 lc "blue" dt 3 notitle,  \
+        for [i=2:|P0|] [0:1] '+' u (real(p(i,$1))):(imag(p(i,$1))) w l lc "blue" dashtype 2 notitle
 
     set size 0.854, 0.862
     set origin 0.107,0.088
+    unset object
+    unset label
     set border 2 linecolor "blue" lw 2
     set ylabel " "
     set y2label " "
