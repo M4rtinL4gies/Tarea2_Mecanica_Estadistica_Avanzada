@@ -3,6 +3,8 @@
 #include <vector>
 #include <cmath>
 
+// El parámetro nbr de molecular field, junto con los nbrs, la energía inicial y los índices para el vector de la energía deben ser cambiados cuando se cambien las condiciones de borde periodicas - no periodicas.
+
 // Function declarations
 void gray_flip(std::vector<int>& t, int N, int& k);
 std::vector<std::array<int, 4>> nbrs_pbc(int N);
@@ -28,7 +30,7 @@ std::vector<long long> enumerate_ising(int N) {
         t[i] = i + 1;
     }
     auto nbr = nbrs_pbc(N); // Change this for no_pbc
-    int e = -2 * N;
+    int e = -2 * N;            // Change this to 2 * L * (L - 1), and change shift index to this value too
     densities[e + 2 * N] = 2;  // Shift index to fit in vector
 
     for (long long i = 0; i < (1ULL << (N - 1)) - 1; ++i) {
@@ -135,6 +137,7 @@ int molecular_field(const std::vector<int>& spins, const std::vector<std::array<
 }
 
 void write_densidades(int N, const std::vector<long long>& densities) {
+    // Change this for no pbc
     std::ofstream file("densidades_pbc.txt", std::ios::app);
     file << "E\t" << (int(std::sqrt(N))) << "x" << (int(std::sqrt(N))) << "\n";
     for (int i = -2 * N; i <= 2 * N; i += 4) {
