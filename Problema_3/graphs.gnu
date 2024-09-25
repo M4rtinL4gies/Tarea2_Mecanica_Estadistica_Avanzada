@@ -43,7 +43,7 @@ if (numero == 2) {
     set xlabel "Temperature T" font "Times New Roman, 22" offset 0,-2
     set ylabel "Mean absolute magnetization m" font "Times New Roman, 22" offset -5,0
     plot [0:5][0:1.05] arch_m u 1:2 every ::3:0::0 w lp lw 1 lc "blue" dashtype 2 pt 7 ps 1 t "4x4" at graph 0.85,0.92, \
-        arch_m u 1:2 every ::3:1::1 w lp lw 1 lc "red" dashtype 2 pt 3 ps 1 t "8x8" at graph 0.85,0.85, \
-        arch_m u 1:2 every ::3:2::2 w lp lw 1 lc "orange" dashtype 2 pt 5 ps 1 t "16x16" at graph 0.85,0.78, \
-        arch_m u 1:2 every ::3:3::3 w lp lw 1 lc "#1bcc23" dashtype 2 pt 2 ps 1 t "32x32" at graph 0.85,0.71
+        arch_m u 1:2 every ::3:1::1 w lp lw 1 lc "red" dashtype 2 pt 7 ps 1 t "8x8" at graph 0.85,0.85, \
+        arch_m u 1:2 every ::3:2::2 w lp lw 1 lc "orange" dashtype 2 pt 7 ps 1 t "16x16" at graph 0.85,0.78, \
+        arch_m u 1:2 every ::3:3::3 w lp lw 1 lc "#1bcc23" dashtype 2 pt 7 ps 1 t "32x32" at graph 0.85,0.71
 }
