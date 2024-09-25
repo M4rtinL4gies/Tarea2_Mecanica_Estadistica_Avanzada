@@ -8,7 +8,7 @@
 #include <algorithm>
 
 // Definir las constantes del sistema
-const int L = 64;  // Tamaño de la red
+const int L = 16;  // Tamaño de la red
 const int N = L * L;  // Número total de spins
 
 // Función para generar la lista de vecinos con condiciones de borde periódicas
@@ -112,6 +112,39 @@ void write_data_m(const std::vector<double>& m_list, const std::vector<double>& 
     file.close();
 }
 
+void write_magnetization_counts(const std::vector<std::vector<int>>& magnetization_counts, int N, const std::vector<double>& T_list) {
+    // Open file for writing
+    std::ofstream outfile("data/magnetization_counts.txt", std::ios::app);
+    if (!outfile.is_open()) {
+        std::cerr << "Error opening file for writing magnetization counts!" << std::endl;
+        return;
+    }
+
+    // Write a header with temperature values
+    outfile << "Temperature ";
+    for (double T : T_list) {
+        outfile << T << " ";
+    }
+    outfile << "\n";
+
+    // Write the magnetization counts for each possible even magnetization
+    // The possible magnetization values are -N, -N+2, ..., N
+    for (int i = 0; i <= N; ++i) {
+        int magnetization_value = -N + 2 * i;  // Even magnetization value from -N to N
+        outfile << magnetization_value << " ";  // Write the magnetization value
+
+        // Write the counts for each temperature
+        for (size_t t = 0; t < T_list.size(); ++t) {
+            outfile << magnetization_counts[t][i] << " ";  // Counts for this temperature and magnetization
+        }
+        outfile << "\n";
+    }
+    outfile << "\n";
+
+    outfile.close();
+    std::cout << "Magnetization counts written to file successfully!" << std::endl;
+}
+
 // Función para realizar las mediciones
 void simulate_wolff(int L, int N, int n_samples, const std::vector<double>& T_list) {
     std::random_device rd;
@@ -124,6 +157,7 @@ void simulate_wolff(int L, int N, int n_samples, const std::vector<double>& T_li
     std::vector<double> cv_list;
     std::vector<double> m_mean_list;
     std::vector<double> binder_list;
+    std::vector<std::vector<int>> magnetization_counts_list;
 
     for (double T : T_list) {
         double beta = 1.0 / T;
@@ -135,16 +169,17 @@ void simulate_wolff(int L, int N, int n_samples, const std::vector<double>& T_li
 
         double E = energy_ising(spins, neighbors);
         int M = std::accumulate(spins.begin(), spins.end(), 0);
+        std::vector<int> magnetization_count(N + 1, 0);  // List of size N + 1
 
-        double Et = E;
-        double Et2 = E * E;
-        double Mt = std::abs(M);
-        double Mt2 = M * M;
-        double Mt4 = M * M * M * M;
-        double m = static_cast<double>(M) / N;  // Calculate magnetization
-        double mt = std::abs(m);                       // Sum |m|
-        double mt2 = m * m;                            // Sum m^2
-        double mt4 = m * m * m * m;                    // Sum m^4
+        // ouble Et = E;
+        // double Et2 = E * E;
+        // double Mt = std::abs(M);
+        // double Mt2 = M * M;
+        // double Mt4 = M * M * M * M;
+        // double m = static_cast<double>(M) / N;  // Calculate magnetization
+        // double mt = std::abs(m);                       // Sum |m|
+        // double mt2 = m * m;                            // Sum m^2
+        // double mt4 = m * m * m * m;                    // Sum m^4
 
         for (int i = 0; i < 1000; ++i) {
             cluster_ising(spins, N, neighbors, p_add, rng, E, M);
@@ -154,36 +189,43 @@ void simulate_wolff(int L, int N, int n_samples, const std::vector<double>& T_li
             cluster_ising(spins, N, neighbors, p_add, rng, E, M);
             
             // Accumulate observables
-            double m = static_cast<double>(M) / N;  // Calculate magnetization
-            mt += std::abs(m);                       // Sum |m|
-            mt2 += m * m;                            // Sum m^2
-            mt4 += m * m * m * m;                    // Sum m^4
+            if (M % 2 == 0) {
+                int index = (M + N) / 2;  // Map magnetization value to index
+                magnetization_count[index]++;
+            }
+            // double m = static_cast<double>(M) / N;  // Calculate magnetization
+            // mt += std::abs(m);                       // Sum |m|
+            // mt2 += m * m;                            // Sum m^2
+            // mt4 += m * m * m * m;                    // Sum m^4
         }
 
         // Now compute averages
-        double m_mean = mt / (n_samples + 1);  // Average |M|, normalized by N
-        double m2_mean = mt2 / (n_samples + 1);    // Average M^2
-        double m4_mean = mt4 / (n_samples + 1);    // Average M^4
+        // double m_mean = mt / (n_samples + 1);  // Average |M|, normalized by N
+        // double m2_mean = mt2 / (n_samples + 1);    // Average M^2
+        // double m4_mean = mt4 / (n_samples + 1);    // Average M^4
 
         // Correct Binder cumulant calculation:
-        double binder = (1.0 / 2.0) * (3.0 - m4_mean / (m2_mean * m2_mean));
+        // double binder = (1.0 / 2.0) * (3.0 - m4_mean / (m2_mean * m2_mean));
 
         // Store results
-        m_mean_list.push_back(m_mean);
-        binder_list.push_back(binder);
+        // m_mean_list.push_back(m_mean);
+        // binder_list.push_back(binder);
 
+        magnetization_counts_list.push_back(magnetization_count);
         std::cout << "Progreso " << T << "/" << T_list.back() << std::endl;
     }
 
     // write_data(T_list, e_mean_list, cv_list);
-    write_data_m(m_mean_list, binder_list, T_list, N);
+    // write_data_m(m_mean_list, binder_list, T_list, N);
+    write_magnetization_counts(magnetization_counts_list, N, T_list);
+
 }
 
 int main() {
     int n_samples = 1e5;
     std::vector<double> T_list;
 
-    for (double T = 2.15; T <= 2.35; T += 0.025) {
+    for (double T = 1; T <= 5; T += 1.5) {
         T_list.push_back(T);
     }
 

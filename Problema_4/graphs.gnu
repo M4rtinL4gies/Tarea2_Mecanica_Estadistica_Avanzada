@@ -3,6 +3,7 @@ reset session
 # PARÁMETROS ------------------------------------------------------------------
 arch_e = "data/energy.txt"
 arch_m = "data/magnetization.txt"
+arc_m_counts = "data/magnetization_counts.txt"
 
 $Data << EOD
 0.5	-1.99997	0.0072887
@@ -155,4 +156,65 @@ if (numero == 5) {
         arch_m u 1:3 every ::3:3::3 w lp lw 1 lc "#1bcc23" dashtype 2 pt 2 ps 1.2 notitle
 
     unset multiplot
+}
+
+# Histograma 6x6
+if (numero == 6) {
+    set xlabel "Magnetization per spin m" font "Times New Roman, 22" offset 0,-2
+    set ylabel "Counts/n_samples" font "Times New Roman, 22" offset -5,0
+    n=36 #number of intervals
+    max=1. #max value
+    min=-1. #min value
+    width=(max-min)/n #interval width
+    set boxwidth width*0.9
+    set style fill solid 0.7
+
+    #plot[-1.5:1.5][0:0.5] arc_m_counts u ($1/n):($2/10**5) every :::0::0 smooth freq w boxes lw 2 lc "#b01111" notitle
+    #plot[-1.5:1.5][0:0.2] arc_m_counts u ($1/n):($3/10**5) every :::0::0 smooth freq w boxes lw 2 lc "#dd9f40" notitle
+    plot[-1.5:1.5][0:0.1] arc_m_counts u ($1/n):($4/10**5) every :::0::0 smooth freq w boxes lw 2 lc "#62a1db" notitle
+}
+
+if (numero == 7) {
+    set xlabel "Magnetization per spin m" font "Times New Roman, 22" offset 0,-2
+    set ylabel "Counts / nº samples" font "Times New Roman, 22" offset -5,0
+    n=16*16 #number of intervals
+    max=1. #max value
+    min=-1. #min value
+    width=(max-min)/n #interval width
+    set boxwidth width*0.9
+    set style fill solid 0.7
+
+    #plot[-1.5:1.5][0:0.5] arc_m_counts u ($1/n):($2/10**5) every :::1::1 smooth freq w boxes lw 2 lc "#b01111" notitle
+    #plot[-1.5:1.5][0:0.02] arc_m_counts u ($1/n):($3/10**5) every :::1::1 smooth freq w boxes lw 2 lc "#dd9f40" notitle
+    #plot[-1.5:1.5] arc_m_counts u ($1/n):($4/10**5) every :::1::1 smooth freq w boxes lw 2 lc "#62a1db" notitle
+}
+
+if (numero == 8) {
+    set xlabel "Magnetization per spin m" font "Times New Roman, 22" offset 0,-2
+    set ylabel "Counts / nº samples" font "Times New Roman, 22" offset -5,0
+    n=32*32 #number of intervals
+    max=1. #max value
+    min=-1. #min value
+    width=(max-min)/n #interval width
+    set boxwidth width*0.9
+    set style fill solid 0.7
+
+    #plot[-1.5:1.5][0:0.5] arc_m_counts u ($1/n):($2/10**5) every :::2::2 smooth freq w boxes lw 2 lc "#b01111" notitle
+    #plot[-1.5:1.5][0:0.005] arc_m_counts u ($1/n):($3/10**5) every :::2::2 smooth freq w boxes lw 2 lc "#dd9f40" notitle
+    plot[-1.5:1.5] arc_m_counts u ($1/n):($4/10**5) every :::2::2 smooth freq w boxes lw 2 lc "#62a1db" notitle
+}
+
+if (numero == 9) {
+    set xlabel "Magnetization per spin m" font "Times New Roman, 22" offset 0,-2
+    set ylabel "Counts" font "Times New Roman, 22" offset -5,0
+    n=64*64 #number of intervals
+    max=1. #max value
+    min=-1. #min value
+    width=(max-min)/n #interval width
+    set boxwidth width*0.9
+    set style fill solid 0.7
+
+    #plot[-1.5:1.5] arc_m_counts u ($1/n):($2/10**5) every :::3::3 smooth freq w boxes lw 2 lc "#b01111" notitle
+    #plot[-1.5:1.5] arc_m_counts u ($1/n):$3 every :::3::3 smooth freq w boxes lw 2 lc "#dd9f40" notitle
+    plot[-1.5:1.5] arc_m_counts u ($1/n):4 every :::3::3 smooth freq w boxes lw 2 lc "#62a1db" notitle
 }
