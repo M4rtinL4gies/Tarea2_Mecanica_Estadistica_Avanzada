@@ -36,9 +36,9 @@ if (numero == 0) {
     set boxwidth width*0.9
     set style fill solid 0.7
 
-    plot[-1.5:1.5][0:0.5] arch u ($1/4):2 every :::0::0 smooth freq w boxes lw 2 lc "#b01111" notitle
+    #plot[-1.5:1.5][0:0.5] arch u ($1/4):2 every :::0::0 smooth freq w boxes lw 2 lc "#b01111" notitle
     #plot[-1.5:1.5][0:0.5] arch u ($1/4):3 every :::0::0 smooth freq w boxes lw 2 lc "#dd9f40" notitle
-    #plot[-1.5:1.5][0:0.5] arch u ($1/4):4 every :::0::0 smooth freq w boxes lw 2 lc "#62a1db" notitle
+    plot[-1.5:1.5][0:0.5] arch u ($1/4):4 every :::0::0 smooth freq w boxes lw 2 lc "#62a1db" notitle
 }
 
 # 4x4 ----------------------------------------------------------
@@ -50,9 +50,9 @@ if (numero == 1) {
     set boxwidth width*0.9
     set style fill solid 0.7
 
-    plot[-1.3:1.3][0:0.2] arch u ($1/16):2 every :::1::1 smooth freq w boxes lw 2 lc "#b01111" notitle
+    #plot[-1.3:1.3][0:0.2] arch u ($1/16):2 every :::1::1 smooth freq w boxes lw 2 lc "#b01111" notitle
     #plot[-1.3:1.3][0:0.2] arch u ($1/16):3 every :::1::1 smooth freq w boxes lw 2 lc "#dd9f40" notitle
-    #plot[-1.3:1.3][0:0.2] arch u ($1/16):4 every :::1::1 smooth freq w boxes lw 2 lc "#62a1db" notitle
+    plot[-1.3:1.3][0:0.2] arch u ($1/16):4 every :::1::1 smooth freq w boxes lw 2 lc "#62a1db" notitle
 }
 
 # 6x6 ----------------------------------------------------------
@@ -64,43 +64,44 @@ if (numero == 2) {
     set boxwidth width*0.9
     set style fill solid 0.7
 
-    plot[-1.1:1.1][0:0.1] arch u ($1/36):2 every :::2::2 smooth freq w boxes lw 2 lc "#b01111" notitle
+    #plot[-1.1:1.1][0:0.1] arch u ($1/36):2 every :::2::2 smooth freq w boxes lw 2 lc "#b01111" notitle
     #plot[-1.1:1.1][0:0.1] arch u ($1/36):3 every :::2::2 smooth freq w boxes lw 2 lc "#dd9f40" notitle
-    #plot[-1.1:1.1][0:0.1] arch u ($1/36):4 every :::2::2 smooth freq w boxes lw 2 lc "#62a1db" notitle
+    plot[-1.1:1.1][0:0.1] arch u ($1/36):4 every :::2::2 smooth freq w boxes lw 2 lc "#62a1db" notitle
 }
 
 # Binder ----------------------------------------------------------
 if (numero == 3) {
-    set xlabel "Temperature" font "Times New Roman, 22" offset 0,-2
-    set ylabel "Binder cumulant" font "Times New Roman, 22" offset -5,0
+    set xlabel "Temperature T" font "Times New Roman, 22" offset 0,-2
+    set ylabel "Binder cumulant B(T)" font "Times New Roman, 22" offset -5,0
     unset grid
     set object 1 rect from 1.95,0.9 to 2.45,0.98 dashtype 2 fs empty front
 
     set multiplot
-    p [0:5][0.1:1.05] arch_binder u 1:2 every :::0::0 w lp lw 2 pt 7 lc "blue" t "2x2" at graph 0.84,0.92, \
-        arch_binder u 1:2 every :::1::1 w lp lw 2 pt 7 lc "red" t "4x4" at graph 0.84,0.85, \
-        arch_binder u 1:2 every :::2::2 w lp lw 2 pt 7 lc "#1bcc23" t "6x6" at graph 0.84,0.78
+    p [0:5][0.1:1.05] arch_binder u 1:2 every :::0::0 w lp lw 1 dashtype 2 pt 7 lc "blue" t "2x2" at graph 0.84,0.92, \
+        arch_binder u 1:2 every :::1::1 w lp lw 1 dashtype 2 pt 7 lc "red" t "4x4" at graph 0.84,0.85, \
+        arch_binder u 1:2 every :::2::2 w lp lw 1 dashtype 2 pt 7 lc "#1bcc23" t "6x6" at graph 0.84,0.78
     
     set size 0.4
     set origin 0.17, 0.24
     unset object
     set grid
     set ytics 0.91, 0.03, 0.97
-    set xlabel "Temperature" font "Times New Roman, 22" offset 0,17
-    set ylabel "Binder cumulant" font "Times New Roman, 22" offset 41,0
+    set xlabel "T" font "Times New Roman, 22" offset 0,17
+    set ylabel "B(T)" font "Times New Roman, 22" offset 41,0
     unset arrow
     set arrow from 2 / (log(1+sqrt(2))), 0.9 to 2 / (log(1+sqrt(2))), 0.98 dashtype 2 nohead
+    set label "T_c ≈ 2.269" font "Times New Roman, 18" at graph 0.15, 0.2
 
-    p [1.95: 2.45][0.9:0.98] arch_binder u 1:2 every :::0::0 w lp lw 2 pt 7 lc "blue" notitle, \
-        arch_binder u 1:2 every :::1::1 w lp lw 2 pt 7 lc "red" notitle, \
-        arch_binder u 1:2 every :::2::2 w lp lw 2 pt 7 lc "#1bcc23" notitle
+    p [1.95: 2.45][0.9:0.98] arch_binder u 1:2 every :::0::0 w lp lw 1 dashtype 2 pt 7 lc "blue" notitle, \
+        arch_binder u 1:2 every :::1::1 w lp lw 1 dashtype 2 pt 7 lc "red" notitle, \
+        arch_binder u 1:2 every :::2::2 w lp lw 1 dashtype 2 pt 7 lc "#1bcc23" notitle
     unset multiplot
 }
 
 # Binder Límites ----------------------------------------------------------
 if (numero == 4) {
-    set xlabel "Temperature" font "Times New Roman, 22" offset 0,-2
-    set ylabel "Binder cumulant" font "Times New Roman, 22" offset -5,0
+    set xlabel "Temperature T" font "Times New Roman, 22" offset 0,-2
+    set ylabel "Binder cumulant B(T)" font "Times New Roman, 22" offset -5,0
     set ytics add ("0.1" 0.1 1, "0.3" 0.3 1, "0.5" 0.5 1, "0.7" 0.7 1)
 
     # Ajustes
@@ -131,8 +132,8 @@ if (numero == 4) {
 if (numero == 5) {
     # Set labels and title
 
-    set xlabel "Energía (E)"
-    set ylabel "Magnetización (M)"
+    set xlabel "Energía E"
+    set ylabel "Magnetización M"
 
     # Set palette and colorbox for color representation
     set palette rgbformulae 22,13,-31
